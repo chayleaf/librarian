@@ -9,8 +9,14 @@ Do note that right now the project is only tested in a limited amount of environ
 
 It probably isn't feasible to integrate with all the different build systems there are to allow automatically fetching source and building it. While it makes me appreciate the Rust build system, it means automatic downloading will only work for prebuild libraries.
 
-# (Current) Features
+## (Current) Features
 
 - Downloading .zip archives with C libraries (Will be extended to .tgz, could be extended to git/etc)
 - A wrapper for adding a link search path (`cargo:rustc-link-search`)
 - A way to copy .dll/.so files to the build folder (Currently only makes sense to do from app build scripts, not lib build scripts)
+
+## License
+
+TL;DR do whatever you want
+
+Licensed under either the [BSD Zero Clause License](LICENSE-0BSD) (https://opensource.org/licenses/0BSD), the [Apache 2.0 License](LICENSE-APACHE) (http://www.apache.org/licenses/LICENSE-2.0) or the [MIT License](LICENSE-MIT) (http://opensource.org/licenses/MIT), at your choice.
