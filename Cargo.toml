@@ -1,0 +1,22 @@
+[package]
+name = "librarian"
+version = "0.1.0"
+authors = ["pavlukivan <ivanpavluk00@gmail.com>"]
+edition = "2018"
+description = "A crate for downloading and linking to non-rust libraries from app build scripts"
+readme = "README.md"
+repository = "https://github.com/pavlukivan/librarian/"
+license = "0BSD OR MIT OR Apache-2.0"
+keywords = []
+categories = ["development-tools::build-utils", "development-tools::ffi"]
+
+[dependencies]
+bytes = { version = "0.5.4", optional = true }
+positioned-io = { version = "0.2.2", optional = true }
+rc-zip = { version = "0.0.1", optional = true }
+reqwest = { version = "0.10.6", optional = true }
+url = { version = "2.1.1", optional = true }
+
+[features]
+download = ["bytes", "positioned-io", "rc-zip", "reqwest", "url"]
+default = ["download"]
