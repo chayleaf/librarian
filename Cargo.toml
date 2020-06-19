@@ -1,6 +1,6 @@
 [package]
 name = "librarian"
-version = "0.2.0.1"
+version = "0.2.1"
 authors = ["pavlukivan <ivanpavluk00@gmail.com>"]
 edition = "2018"
 description = "A crate for downloading and linking to non-rust libraries from app build scripts"
