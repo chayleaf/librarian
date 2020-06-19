@@ -15,6 +15,14 @@ It probably isn't feasible to integrate with all the different build systems the
 - A wrapper for adding a link search path (`cargo:rustc-link-search`)
 - A way to copy .dll/.so files to the build folder (Currently only makes sense to do from app build scripts, not lib build scripts)
 
+## Installing
+
+To use Librarian in your build script, add the following to your Cargo.toml:
+```toml
+[build-dependencies]
+librarian = "*"
+```
+
 ## License
 
 TL;DR do whatever you want
