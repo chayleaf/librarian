@@ -5,15 +5,107 @@
 
 use std::{
     env,
+    error,
+    fmt,
     fs,
     io,
     path::{Path, PathBuf},
 };
 
-#[cfg(feature = "download")]
-mod download;
-#[cfg(feature = "download")]
-pub use download::*;
+#[cfg(feature = "web")]
+mod web;
+#[cfg(feature = "web")]
+pub use web::*;
+
+#[cfg(feature = "tgz")]
+mod tgz;
+
+#[cfg(feature = "zip")]
+mod zip;
+
+/// A type specifying an error that occured during an archive extraction
+#[derive(Debug)]
+pub enum ExtractError {
+    /// Failed to read the zip file
+    #[cfg(feature = "zip")]
+    ZipError(rc_zip::Error),
+    /// Failed to save files from the archive to the HDD
+    WriteError(io::Error),
+}
+
+impl From<io::Error> for ExtractError {
+    #[inline]
+    fn from(err: io::Error) -> ExtractError {
+        ExtractError::WriteError(err)
+    }
+}
+
+impl fmt::Display for ExtractError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ExtractError::*;
+        match *self {
+            #[cfg(feature = "zip")]
+            ZipError(ref e) => e.fmt(f),
+            WriteError(ref e) => e.fmt(f),
+        }
+    }
+}
+
+impl error::Error for ExtractError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        use ExtractError::*;
+        match *self {
+            #[cfg(feature = "zip")]
+            ZipError(ref e) => Some(e),
+            WriteError(ref e) => Some(e),
+        }
+    }
+}
+
+/// Extract the archive and return the path to the extracted files. Zip/tar(gz) archives are supported.
+/// /// ```
+/// # fn run() -> Result<(), Box<dyn std::Error>> {
+/// # let path_to_lib_zip = std::path::Path::new("./whatever.zip");
+/// let path_to_dylib_folder = extract_archive(path_to_lib_zip)?.join("bin");
+/// librarian::install_dylibs(path_to_dylib_folder, None, None)?;
+/// # Ok(())
+/// # }
+/// ```
+pub fn extract_archive<T: AsRef<Path> + ?Sized>(
+    archive: &T,
+    target: Option<&Path>
+) -> Result<PathBuf, ExtractError> {
+    let target = if let Some(target) = target {
+        PathBuf::from(target)
+    } else {
+        PathBuf::from(env::var("OUT_DIR").expect("You must provide the output directory when not running from a build script."))
+    };
+
+    let fn_as_str = archive.as_ref().file_name().unwrap().to_string_lossy();
+    #[cfg(feature = "zip")]
+    {
+        if fn_as_str.ends_with(".zip") {
+            crate::zip::extract_zip(archive, target.as_path())?;
+            return Ok(target);
+        }
+    }
+    #[cfg(feature = "tgz")]
+    {
+        if fn_as_str.ends_with(".tar.gz") || fn_as_str.ends_with(".tgz") {
+            crate::tgz::extract_tar_gz(archive, target.as_path())?;
+            return Ok(target);
+        }
+    }
+    #[cfg(feature = "tar")]
+    {
+        if fn_as_str.ends_with(".tar") {
+            crate::tgz::extract_tar(archive, target.as_path())?;
+            return Ok(target);
+        }
+    }
+    
+    panic!("archive format not supported");
+}
 
 /// Get assumed path to the target executable directory. Only works from build scripts.
 fn get_target_dir() -> io::Result<PathBuf>  {

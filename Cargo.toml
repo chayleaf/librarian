@@ -1,6 +1,6 @@
 [package]
 name = "librarian"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["pavlukivan <ivanpavluk00@gmail.com>"]
 edition = "2018"
 description = "A crate for downloading and linking to non-rust libraries from app build scripts"
@@ -16,7 +16,12 @@ positioned-io = { version = "0.2.2", optional = true }
 rc-zip = { version = "0.0.1", optional = true }
 reqwest = { version = "0.10.6", optional = true, features = ["blocking"] }
 url = { version = "2.1.1", optional = true }
+tar = { version = "0.4.29", optional = true }
+flate2 = { version = "1.0.14", optional = true }
 
 [features]
-download = ["bytes", "positioned-io", "rc-zip", "reqwest", "url"]
+zip = ["rc-zip", "positioned-io"]
+web = ["bytes", "reqwest", "url"]
+tgz = ["tar", "flate2"]
+download = ["web", "zip", "tgz"]
 default = ["download"]

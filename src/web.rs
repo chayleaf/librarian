@@ -1,12 +1,7 @@
-#![cfg(feature = "download")]
+#![cfg(feature = "web")]
 
 use {
     bytes::Buf,
-    positioned_io,
-    rc_zip::{
-        prelude::*,
-        EntryContents,
-    },
     std::{
         env,
         error,
@@ -127,115 +122,15 @@ pub fn download_or_find_file(
     }
 }
 
-/// A type specifying an error that occured during an archive extraction
-#[derive(Debug)]
-pub enum ExtractError {
-    /// Failed to read the zip file
-    ZipError(rc_zip::Error),
-    /// Failed to save files from the archive to the HDD
-    WriteError(io::Error),
-}
-
-impl From<rc_zip::Error> for ExtractError {
-    #[inline]
-    fn from(err: rc_zip::Error) -> ExtractError {
-        ExtractError::ZipError(err)
-    }
-}
-
-impl From<io::Error> for ExtractError {
-    #[inline]
-    fn from(err: io::Error) -> ExtractError {
-        ExtractError::WriteError(err)
-    }
-}
-
-impl fmt::Display for ExtractError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ExtractError::*;
-        match *self {
-            ZipError(ref e) => e.fmt(f),
-            WriteError(ref e) => e.fmt(f),
-        }
-    }
-}
-
-impl error::Error for ExtractError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        use ExtractError::*;
-        match *self {
-            ZipError(ref e) => Some(e),
-            WriteError(ref e) => Some(e),
-        }
-    }
-}
-
-/// Extract the archive and return the path to the extracted files. **Only zip archives are supported for now.**
-pub fn extract_archive<T: AsRef<Path> + ?Sized>(
-    archive: &T,
-    target: Option<&Path>
-) -> Result<PathBuf, ExtractError> {
-    let target = if let Some(target) = target {
-        PathBuf::from(target)
-    } else {
-        PathBuf::from(env::var("OUT_DIR").expect("You must provide the output directory when not running from a build script."))
-    };
-    
-    if archive.as_ref().file_name().unwrap().to_string_lossy().ends_with(".zip") {
-        let zipfile = fs::File::open(archive)?;
-        let reader = zipfile.read_zip()?;
-        for entry in reader.entries() {
-            match entry.contents() {
-                EntryContents::Directory(c) => {
-                    let path = target.join(c.entry.name());
-                    fs::create_dir_all(path.parent().unwrap())?;
-                },
-                EntryContents::File(c) => {
-                    let path = target.join(c.entry.name());
-                    fs::create_dir_all(path.parent().unwrap())?;
-                    let mut writer = fs::File::create(path)?;
-                    let mut reader = c
-                        .entry
-                        .reader(|offset| positioned_io::Cursor::new_pos(&zipfile, offset));
-
-                    io::copy(&mut reader, &mut writer)?;
-                },
-                // Symlinks aren't supported! Open an issue if you need them.
-                _ => {}
-            }
-        }
-    } else {
-        panic!("archive format not supported yet");
-    }
-    Ok(target)
-}
-
 #[cfg(test)]
-mod download_tests {
+mod web_tests {
     #[test]
-    fn unzip() {
+    fn download() {
         use crate::tests::dir_list_equals;
         use crate::*;
         let cur_file = Path::new(file!());
         let root = cur_file.parent().unwrap().parent().unwrap();
-        let out = root.join("target").join("test").join("unzip");
-        let _ = fs::remove_dir_all(out.as_path());
-        let data_dir = root.join("test_input");
-        assert_eq!(extract_archive(data_dir.join("file.zip").as_path(), Some(out.as_path())).unwrap(), out);
-        assert_eq!(true, dir_list_equals(out.join("zip").as_path(), vec![ "compressed.txt" ]));
-        assert_eq!(
-            fs::read_to_string(out.join("zip").join("compressed.txt")).unwrap(),
-            "it works!".to_string()
-        );
-    }
-
-    #[test]
-    fn web() {
-        use crate::tests::dir_list_equals;
-        use crate::*;
-        let cur_file = Path::new(file!());
-        let root = cur_file.parent().unwrap().parent().unwrap();
-        let out = root.join("target").join("test").join("web");
+        let out = root.join("target").join("test").join("download");
         let _ = fs::remove_dir_all(out.as_path());
         let _ = fs::create_dir_all(out.as_path());
         let url = "https://httpbin.org/base64/YWJj";
