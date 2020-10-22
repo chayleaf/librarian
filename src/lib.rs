@@ -62,13 +62,14 @@ impl error::Error for ExtractError {
     }
 }
 
-/// Extract the archive and return the path to the extracted files. Zip/tar(gz) archives are supported.
+/// Extract the archive to a folder and return the path to the extracted files. Zip/tar/tar.gz archives are supported.
+/// If extraction target path isn't provided and the function is executed from a build script, the build script output folder is used.
 /// 
 /// ```
-/// # fn run() -> Result<(), Box<dyn std::Error>> {
+/// # fn run() -> Result<(), Box<dyn std::error::Error>> {
 /// # let path_to_lib_zip = std::path::Path::new("./whatever.zip");
-/// let path_to_dylib_folder = extract_archive(path_to_lib_zip)?.join("bin");
-/// librarian::install_dylibs(path_to_dylib_folder, None, None)?;
+/// let path_to_dylib_folder = librarian::extract_archive(path_to_lib_zip, None)?.join("bin");
+/// librarian::install_dylibs(&path_to_dylib_folder, None, None)?;
 /// # Ok(())
 /// # }
 /// ```
