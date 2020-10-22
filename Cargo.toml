@@ -1,6 +1,6 @@
 [package]
 name = "librarian"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["pavlukivan <ivanpavluk00@gmail.com>"]
 edition = "2018"
 description = "A crate for downloading and linking to non-rust libraries from app build scripts"
@@ -11,13 +11,13 @@ keywords = []
 categories = ["development-tools::build-utils", "development-tools::ffi"]
 
 [dependencies]
-bytes = { version = "0.5.5", optional = true }
+bytes = { version = "^0.5", optional = true }
 positioned-io = { version = "0.2.2", optional = true }
 rc-zip = { version = "0.0.1", optional = true }
-reqwest = { version = "0.10.6", optional = true, features = ["blocking"] }
+reqwest = { version = "0.10.8", optional = true, features = ["blocking"] }
 url = { version = "2.1.1", optional = true }
-tar = { version = "0.4.29", optional = true }
-flate2 = { version = "1.0.14", optional = true }
+tar = { version = "0.4.30", optional = true }
+flate2 = { version = "1.0.18", optional = true }
 
 [features]
 zip = ["rc-zip", "positioned-io"]

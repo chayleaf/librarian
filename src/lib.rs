@@ -63,7 +63,8 @@ impl error::Error for ExtractError {
 }
 
 /// Extract the archive and return the path to the extracted files. Zip/tar(gz) archives are supported.
-/// /// ```
+/// 
+/// ```
 /// # fn run() -> Result<(), Box<dyn std::Error>> {
 /// # let path_to_lib_zip = std::path::Path::new("./whatever.zip");
 /// let path_to_dylib_folder = extract_archive(path_to_lib_zip)?.join("bin");
@@ -144,6 +145,7 @@ pub enum DyLibNameFilter<'a> {
 /// `target_dir` can be left empty to attempt to automatically find the target executable directory.
 /// 
 /// To just install all of the dynamic libraries from a folder, do:
+/// 
 /// ```
 /// # fn run() -> std::io::Result<()> {
 /// # let path_to_dylib_folder = std::path::Path::new(".");
@@ -201,6 +203,7 @@ pub fn install_dylibs<T: AsRef<Path> + ?Sized>(
 /// The function can be considered an analog of `install_dylibs` for static libs; it makes the static libs in a folder available to the linker.
 /// 
 /// Usage:
+/// 
 /// ```
 /// # fn run() {
 /// # let path_to_static_lib_folder = std::path::Path::new(".");

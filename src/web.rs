@@ -87,6 +87,7 @@ impl error::Error for DownloadError {
 /// You can use `out_dir` to specify the download directory, otherwise the build script output directory will be used.
 /// 
 /// Example:
+/// 
 /// ```
 /// # fn run() -> Result<(), Box<dyn std::error::Error>> {
 /// librarian::download_or_find_file("https://example.com/file.zip", None)?;
@@ -111,9 +112,9 @@ pub fn download_or_find_file(
         let path = out_dir.join(fname);
         if !path.exists() {
             let response = reqwest::blocking::get(url)?;
-            let mut dest = fs::File::create(path.clone())?;
             let content = response.bytes()?;
             let mut bytes = content.bytes();
+            let mut dest = fs::File::create(path.clone())?;
             io::copy(&mut bytes, &mut dest)?;
         }
         Ok(path)
